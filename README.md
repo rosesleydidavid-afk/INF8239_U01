@@ -17,7 +17,7 @@ Determinar si un solicitante de crédito representa un buen o mal riesgo crediti
 
 ### 1. Clonar el repositorio y crear el entorno virtual
 ```
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/rosesleydidavid-afk/INF8239_U01.git
 cd INF8239_U01
 python -m venv .venv
 .venv\Scripts\Activate.ps1
