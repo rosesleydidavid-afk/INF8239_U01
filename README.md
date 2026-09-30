@@ -83,3 +83,29 @@ INF8239_U01/
 - El dataset tiene solo 1,000 filas — un tamaño modesto que limita la robustez de la validación cruzada (desviaciones estándar de hasta 0.04 entre pliegues).
 - Las variables categóricas provienen de codificaciones alemanas de los años 90 (montos en Marcos Alemanes, categorías laborales de esa época) — su vigencia para un contexto crediticio actual es limitada.
 - No se realizó calibración de probabilidades pese a usar `probability=True`; si se necesitaran probabilidades confiables para fijar un umbral de decisión, correspondería aplicar `CalibratedClassifierCV` en un trabajo futuro.
+
+## Ejercicio 02 — Ensambles, reducción dimensional y Green AI
+
+### Modelos comparados
+Se evaluaron 6 configuraciones bajo el mismo protocolo (partición, métrica F1 macro): regresión logística, SVM (C=1 y C=10, ambas con `class_weight="balanced"`), Random Forest (100 y 300 árboles, balanceado) y HistGradientBoosting.
+
+### Resultados principales
+
+| Modelo | F1 macro | Tiempo ajuste (mediana) | Tamaño | Pareto |
+|---|---|---|---|---|
+| **svm_c1** | **0.736** | 1.38s | 305 KB | ✅ |
+| **logistic** | **0.721** | **0.25s** | **7.9 KB** | ✅ |
+| svm_c10 | 0.727 | 1.99s | 281 KB | ❌ |
+| rf_300 | 0.697 | 3.17s | 3,864 KB | ❌ |
+| boost | 0.688 | 1.77s | 210 KB | ❌ |
+| rf_100 | 0.675 | 1.20s | 1,316 KB | ❌ |
+
+### Reducción dimensional
+- **PCA**: redujo de 61 a 32 dimensiones (95% de varianza), con una caída de F1 macro de 0.736 a 0.712.
+- **t-SNE** (dos semillas, 42 y 7): estructura razonablemente estable entre semillas, pero sin separación visual clara entre clases — coherente con la dificultad del problema.
+
+### Decisión Pareto
+Solo `svm_c1` y `logistic` quedan en la frontera de Pareto. Se selecciona **svm_c1** como modelo final: aunque `logistic` es 81.9% más rápida y 38.6 veces más liviana, `svm_c1` ofrece 5.2 puntos porcentuales más de recall — crítico dado que la matriz de costos oficial del dataset penaliza los falsos negativos 5 veces más que los falsos positivos.
+
+### Entorno de medición
+Python 3.14.2, Windows 11, Intel64 Family 6 Model 122, scikit-learn 1.9.1. Los tiempos reportados son específicos de este hardware y no deben interpretarse como valores absolutos.
